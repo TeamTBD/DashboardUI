@@ -38,9 +38,9 @@ if (uaaIsConfigured) {
 }
 
 const oauth2 = require('simple-oauth2')({
-        clientID: config.clientId,
+        clientID: "team-tbd-client",
         clientSecret: "tbd_client_secret",
-        site: config.uaaURL,
+        site: "https://a34e812e-6390-4d54-a206-06feff240faa.predix-uaa.run.aws-usw02-pr.ice.predix.io",
         tokenPath: '/oauth/token',
         authorizationPath: '/oauth/authorize',
         useBasicAuthorizationHeader: false
@@ -126,20 +126,20 @@ if (uaaIsConfigured) {
   	res.send('<h2>This is a sample secure route.</h2>');
   });
   
-   //get client token from uaa
-   app.get('/tstoken', function(req, res) {
-		console.log('Getting client token');
-		const tokenConfig = {};
-		oauth2.client.getToken(tokenConfig, function saveToken(error, result) {
-			if (error) { console.log('Access Token Error', error.message); }
-			var clienttoken = oauth2.accessToken.create(result);
-			var clientAccessToken = clienttoken.token.access_token;
-			res.send(clientAccessToken);
-			
-			});
-    });
   
 }
+
+//get client token from uaa
+app.get('/tstoken', function(req, res) {
+    console.log('Getting client token');
+    const tokenConfig = {};
+    oauth2.client.getToken(tokenConfig, function saveToken(error, result) {
+        if (error) { console.log('Access Token Error', error.message); }
+        var clienttoken = oauth2.accessToken.create(result);
+        var clientAccessToken = clienttoken.token.access_token;
+        res.send(JSON.stringify({'token':clientAccessToken}));
+        });
+});
 
 //logout route
 app.get('/logout', function(req, res) {
