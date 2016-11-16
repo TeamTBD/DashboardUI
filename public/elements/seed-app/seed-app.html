@@ -53,7 +53,7 @@
             use-hash-as-path>
           </app-location>
 
-          <!-- /dashboards rotue and view -->
+          <!-- /dashboards route and view -->
           <app-route
             route="[[_route]]"
             pattern="/dashboards"
@@ -68,7 +68,7 @@
           <!-- /blankpage route and view -->
           <app-route
             route="[[_route]]"
-            pattern="/blankpage"
+            pattern="/intro"
             active="{{_blankpageActive}}">
           </app-route>
           <px-view
@@ -89,7 +89,6 @@
       is: 'seed-app',
 
       properties: {
-
 
         routesActive: {
           type: Boolean,
@@ -113,7 +112,7 @@
           value: function() {
             return [{
               "label": "Introduction",
-              "path": "/blankpage",
+              "path": "/intro",
               "icon": "fa-tachometer"
             }, {
               "label": "Agriculture",
@@ -163,10 +162,10 @@
       },
 
       _checkForDefaultRoute: function() {
-        // set default route to /dashboards
+        // set default route to /intro
         var l = window.location;
         if((l.hash === "#/" || l.hash === "") && l.pathname === "/") {
-          l.hash = "/dashboards";
+          l.hash = "/intro";
         }
       }
 
