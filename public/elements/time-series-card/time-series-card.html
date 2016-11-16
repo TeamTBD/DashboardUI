@@ -48,15 +48,15 @@
       properties: {
         config: {
           type: Object
-        }
+        },
       },
       ready: function(){
-        this.$.tokenRequest.generateRequest();
+        this.$.tokenRequest.generateRequest(); // And then also queries Time Series
       },
       handleTokenResponse: function(response) {
         console.log("Retrieved UAA token");
         this.token = response.detail.response.token;
-        // Ideally this would be done in the ready function, but it needs a token
+        // Ideally getting timeseries would not be done in the same call, but it needs to wait till the token is back
         this.queryTimeseriesData();
       },
       handleTokenError: function(error) {
@@ -65,12 +65,10 @@
       queryTimeseriesData: function() {
         this.queryUrl = 'https://time-series-store-predix.run.aws-usw02-pr.ice.predix.io/v1/datapoints';
 
-        // TODO: Get token from UAA instead of hard coding
         authorization = "bearer " + this.token;
-        console.log(authorization);
         this.$.timeseriesRequest.headers = {
           'Predix-Zone-Id': 'b235b339-25b8-4ca0-93be-67d8f01db98e',
-          'authorization': 'bearer eyJhbGciOiJSUzI1NiIsImtpZCI6ImxlZ2FjeS10b2tlbi1rZXkiLCJ0eXAiOiJKV1QifQ.eyJqdGkiOiJhMTIzZTI3NzkxZTc0OTVhOTRhOTZlMzU1MDliMzJmMyIsInN1YiI6InRlYW0tdGJkLWNsaWVudCIsInNjb3BlIjpbInVhYS5yZXNvdXJjZSIsInRpbWVzZXJpZXMuem9uZXMuYjIzNWIzMzktMjViOC00Y2EwLTkzYmUtNjdkOGYwMWRiOThlLnVzZXIiLCJ0aW1lc2VyaWVzLnpvbmVzLmIyMzViMzM5LTI1YjgtNGNhMC05M2JlLTY3ZDhmMDFkYjk4ZS5pbmdlc3QiLCJ0aW1lc2VyaWVzLnpvbmVzLmIyMzViMzM5LTI1YjgtNGNhMC05M2JlLTY3ZDhmMDFkYjk4ZS5xdWVyeSJdLCJjbGllbnRfaWQiOiJ0ZWFtLXRiZC1jbGllbnQiLCJjaWQiOiJ0ZWFtLXRiZC1jbGllbnQiLCJhenAiOiJ0ZWFtLXRiZC1jbGllbnQiLCJncmFudF90eXBlIjoiY2xpZW50X2NyZWRlbnRpYWxzIiwicmV2X3NpZyI6ImZiYzE2NTFiIiwiaWF0IjoxNDc5MjM4NzE1LCJleHAiOjE0NzkyODE5MTUsImlzcyI6Imh0dHBzOi8vYTM0ZTgxMmUtNjM5MC00ZDU0LWEyMDYtMDZmZWZmMjQwZmFhLnByZWRpeC11YWEucnVuLmF3cy11c3cwMi1wci5pY2UucHJlZGl4LmlvL29hdXRoL3Rva2VuIiwiemlkIjoiYTM0ZTgxMmUtNjM5MC00ZDU0LWEyMDYtMDZmZWZmMjQwZmFhIiwiYXVkIjpbInRlYW0tdGJkLWNsaWVudCIsInVhYSIsInRpbWVzZXJpZXMuem9uZXMuYjIzNWIzMzktMjViOC00Y2EwLTkzYmUtNjdkOGYwMWRiOThlIl19.sBftyL1aBYL8okonzJqJBKVOmBTmkAEafHfuvtQBj6aO5QGmEVMrFfzf_Db2vcpsKXJlHWZ-JnWWJYByf_CW3h20wjdzgQ1fuaaqLtGRnmwrt_Uu9GY5PG9Hn9VZ0JbzcV7YgvvW1C6eySpaqsXteLuDU9tAC1mzQziQjfWVhOPda1psS92hFrHt_-7P9UMT2yML2dc24xd1wsVXuUuYa6miK0KiDB9E0KEOkn6sEGVtK6EtKDaZ9D_R3Ve6PsZ-mwXT04C0AT4oyJ-rys5_MIYxIjIy9OXMsa-TWn1mw0IB7CR89VsDNDaVCbC2lG15c4D1KRJZbVSDvluWyP2Tmw'
+          'authorization': authorization
         };
 
         this.$.timeseriesRequest.method = 'POST';
@@ -111,7 +109,7 @@
       },
       handleTimeseriesError: function(error) {
         console.error("Time series query failed: ");
-        console.log(error);
+        console.error(error);
       },
       parseTimeSeriesToChart: function(tagNum, timeseriesData) {
         requestDatapoints = timeseriesData.tags[tagNum].results[0].values;
@@ -123,9 +121,7 @@
         }
         return chartDataPoints;
       }
-
     });
-
   </script>
 </dom-module>
 
