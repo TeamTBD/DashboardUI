@@ -10,21 +10,21 @@
 
 <dom-module id="time-series-card">
   <template>
-    <px-card header-text="Time Series Card">
+
+    <px-card header-text="Edison Light Data">
       <px-vis-timeseries
-        options='{{chartArgs}}'
+        options='{{lightChartArgs}}'
         include-all-series="true">
       </px-vis-timeseries>
-
-      <px-rangepicker
-        id="rangepicker"
-        range="{{range}}"
-        date-format="YYYY/MM/DD"
-        time-format="hh:mm:ss A"
-        show-buttons="true">
-      </px-rangepicker>
-
     </px-card>
+
+    <px-card header-text="Edison Temperature Data">
+      <px-vis-timeseries
+        options='{{tempChartArgs}}'
+        include-all-series="true">
+      </px-vis-timeseries>
+    </px-card>
+
     <iron-ajax
       id="timeseriesRequest"
       url="{{queryUrl}}"
@@ -45,15 +45,6 @@
 
       ready: function(){
         this.queryTimeseriesData();
-
-        var rangepicker = this.$.rangepicker,
-          btnSnap = this.$.btnSnap,
-          timeSerie = this.$.timeSerie;
-
-        rangepicker.range = {
-          "from":"2016-04-10T04:01:00.000Z",
-          "to":"2016-11-01T20:42:00.000Z"
-        };
       },
 
       queryTimeseriesData: function() {
@@ -67,14 +58,24 @@
 
         this.$.timeseriesRequest.method = 'POST';
         // TODO: Update tag name and time range programatically, switch to get latest datapoints call?
-        tagName = "Light:EDISON-SETUP";
+        light = "Light:EDISON-SETUP";
+        temp = "Temperature:EDISON-SETUP";
+
         currentTime = Date.now();
-        beginTime = currentTime - 100000; // 100s
+
+        // TODO change this back
+        //beginTime = currentTime - 100000; // 100s
+        beginTime = 0;
+
         this.$.timeseriesRequest.body = JSON.stringify({
           "cache_time": 0,
           "tags": [
             {
-              "name": tagName,
+              "name": light,
+              "order": "desc"
+            },
+            {
+              "name": temp,
               "order": "desc"
             }
           ],
@@ -85,17 +86,20 @@
         this.$.timeseriesRequest.generateRequest();
       },
       handleTimeseriesResponse: function(response) {
-        chartDatapoints = this.parseTimeseriesToChart(response.detail.response);
-        console.log(chartDatapoints.length + " time series data points retrieved successfully: ");
-        console.log(chartDatapoints);
-        this.chartArgs = {"chartData": chartDatapoints}
+        console.log(response.detail.response);
+
+        lightDatapoints = this.parseTimeSeriesToChart(0, response.detail.response);
+        tempDatapoints = this.parseTimeSeriesToChart(1, response.detail.response);
+
+        this.lightChartArgs = {"chartData": lightDatapoints};
+        this.tempChartArgs = {"chartData": tempDatapoints};
       },
       handleTimeseriesError: function(error) {
         console.error("Time series query failed: ");
         console.log(error);
       },
-      parseTimeseriesToChart: function(timeseriesData) {
-        requestDatapoints = timeseriesData.tags[0].results[0].values;
+      parseTimeSeriesToChart: function(tagNum, timeseriesData) {
+        requestDatapoints = timeseriesData.tags[tagNum].results[0].values;
         chartDataPoints = [];
 
         for (var i=0; i < requestDatapoints.length; i++) {
@@ -104,6 +108,7 @@
         }
         return chartDataPoints;
       }
+
     });
 
   </script>
