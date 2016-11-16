@@ -2,13 +2,31 @@
   "id": "parent-asset",
   "data": [{
     "id": "child-asset",
-    "name": "Cabbage Rack",
+    "name": "Cabbage Rack 1",
     "parent": "/enterprises/parent-asset",
     "parentId": "/enterprises/parent-asset",
     "description": "Child Asset",
     "uri": "/sites/child-asset",
     "level": "site",
     "isOpenable": true
+  }, {
+    "id": "child-asset2",
+    "name": "Cabbage Rack 2",
+    "parent": "/enterprises/parent-asset",
+    "parentId": "/enterprises/parent-asset",
+    "description": "Child Asset",
+    "uri": "/sites/child-asset",
+    "level": "site",
+    "isOpenable": false
+  }, {
+    "id": "child-asset3",
+    "name": "Cabbage Rack 3",
+    "parent": "/enterprises/parent-asset",
+    "parentId": "/enterprises/parent-asset",
+    "description": "Child Asset",
+    "uri": "/sites/child-asset",
+    "level": "site",
+    "isOpenable": false
   }],
   "meta": {
     "parentId": "parent-asset"
