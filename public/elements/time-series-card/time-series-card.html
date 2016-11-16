@@ -48,7 +48,7 @@
       properties: {
         config: {
           type: Object
-        },
+        }
       },
       ready: function(){
         this.$.tokenRequest.generateRequest(); // And then also queries Time Series
@@ -72,25 +72,17 @@
         };
 
         this.$.timeseriesRequest.method = 'POST';
-        // TODO: Update tag name and time range programatically, switch to get latest datapoints call?
         light = "Light:EDISON-SETUP";
         temp = "Temperature:EDISON-SETUP";
 
         currentTime = Date.now();
-
-        // TODO change this back
-        //beginTime = currentTime - 100000; // 100s
-        beginTime = 0;
+        beginTime = currentTime - 10800 * 1000; // 3 hours
 
         this.$.timeseriesRequest.body = JSON.stringify({
           "cache_time": 0,
           "tags": [
-            {
-              "name": light,
-            },
-            {
-              "name": temp,
-            }
+            {"name": light},
+            {"name": temp}
           ],
           "start": beginTime,
           "end": currentTime
