@@ -2,7 +2,7 @@
   "id": "root",
   "data": [{
     "id": "parent-asset",
-    "name": "Parent Asset",
+    "name": "Cabbage Environment",
     "parent": "/parent-asset",
     "parentId": "/parent-asset",
     "description": "Parent Asset Description",
