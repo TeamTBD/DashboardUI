@@ -1,0 +1,16 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/px-card/px-card.html">
+
+<dom-module id="vf-start-here-card">
+  <template>
+    <px-card header-text="Start here">
+      <content></content>
+    </px-card>
+  </template>
+</dom-module>
+<script>
+  Polymer({
+    is: 'vf-start-here-card',
+    behaviors: [px.card]
+  });
+</script>

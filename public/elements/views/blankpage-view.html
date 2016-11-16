@@ -1,0 +1,61 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/px-sample-cards/blank-card.html">
+<link rel="import" href="../vf-context-card/vf-context-card.html">
+<link rel="import" href="../vf-start-here-card/vf-start-here-card.html">
+<link rel="import" href="../../bower_components/px-view-header/px-view-header.html">
+<link rel="import" href="../../bower_components/px-vis-timeseries/px-vis-timeseries.html">
+<link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
+<dom-module id="blankpage-view">
+  <template>
+    <px-view-header title="Why this matters" style="display: block; margin-bottom: 6px;"></px-view-header>
+    
+    <vf-start-here-card id="vf-start-here-card">
+    <p>This page is intended to provide you with some context for the app that we built.
+    <br>
+    <p><b>Business case</b>
+    <br>We pitched this idea to LED product managers in Current, powered by GE.  Their sales estimates (pending full build):
+    <br>Year 1: $5MM-$20MM
+    <br>Year 5: $100MM-$200MM</p>
+    </vf-start-here-card>
+    <br>
+    <vf-context-card id="vf-context-card">
+    <p><b>1) Less water<br>2) Less land<br>3) Less waste</b></p>
+    <p><b>Context</b>
+    <br>-Market for locally grown crops grew from $1 billion in 2005 to $9 billion in 2015
+    <br>-By the year 2050, nearly 80% of the earth’s population will reside in urban centers
+    <br>-The human population will increase by about 3 billion people during the interim
+    <br>-An estimated 109 hectares of new land (about 20% more land than is represented by the country of Brazil) will be needed to grow enough food to feed them
+    <br>-We're already using 80% of suitable farming land to grow crops
+    <br></p>
+  <p><b>Environmental Impact</b>
+    <br><b>Water</b>
+    <br>-70% of our water supply goes to agriculture
+    <br>-70% of water contamination comes from agriculture
+    <br>-Vertical farming uses 95% less water
+    <br>
+    <br><b>Land</b>
+    <br>-25% of the world’s land is now “highly degraded,” with soil erosion, water degradation and biodiversity loss
+    <br>-Vertical farming uses less than 1% of the land required by conventional growing
+    <br>-Vertical farming is over 75 times more productive per square foot vs. traditional agriculture
+    <br>
+    <br><b>Carbon Emissions</b>
+    <br>-95% of America's leafy greens are grown in the western portion of the US, meaning it has to travel thousands of miles to get to your plate
+    <br>-Vertical farms can exist in old industrial buildings within a city</p>
+    </vf-context-card>
+
+
+  </template>
+
+  <script>
+    Polymer({
+      is: 'blankpage-view',
+      properties: {
+      },
+      ready: function() {
+        console.log('blankpage-view ready()');
+        this.queryTimeseriesData();
+      },
+      
+    });
+  </script>
+</dom-module>
