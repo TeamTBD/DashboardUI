@@ -17,39 +17,43 @@
     <!-- apply imported style module -->
     <style include="three-widgets-card-styles"></style>
 
-    <px-threeup id="widgetsx3" widget-header="Predix UI Components" widget-icon="fa-area-chart">
+    <px-threeup id="widgetsx3" widget-header="Farm Dashboard" widget-icon="fa-area-chart">
       <div class="widget-1">
         <h1 class="epsilon">
-          [[_simpleDataValuesB.data.name]]
+          Energy Usage kW
         </h1>
         <div class="flex">
           <div class="flex">
-            <div class="large-value">987</div>
             <div class="flex flex--col u-ml-">
-              <small class="caps">Output</small>
-              <small class="caps muted">mw</small>
             </div>
           </div>
           <div class="u-ml+ flex">
-            <div class="large-value">1010</div>
             <div class="flex flex--col u-ml-">
-              <small class="caps">Capacity</small>
-              <small class="caps muted">mw</small>
             </div>
           </div>
         </div>
         <px-simple-line-chart
-          line-data="[[_simpleDataValuesB.data.values]]"
+          line-data="{{energyVals.data.values}}"
           width="auto"
-          max="10"
-          min="0"
-          threshold="5">
+          max="40"
+          min="0">
         </px-simple-line-chart>
-        <iron-ajax
-          url="/api/time-series/simple-data/2"
-          last-response="{{_simpleDataValuesB}}"
-          auto>
-        </iron-ajax>
+		<iron-ajax
+      id="tokenRequest"
+      url="/tstoken"
+      handle-as="json"
+      on-response="handleTokenResponse"
+      on-error="handleTokenError"
+      debounce-duration="300">
+    </iron-ajax>
+    <iron-ajax
+      id="timeseriesRequest"
+      url="{{queryUrl}}"
+      handle-as="json"
+      on-response="handleTimeseriesResponse"
+      on-error="handleTimeseriesError"
+      debounce-duration="300">
+    </iron-ajax>
       </div>
       <div class="widget-2">
         <h1 class="epsilon">
@@ -88,7 +92,88 @@
 
   <script>
     Polymer({
-      is: 'three-widgets-card'
+      is: 'three-widgets-card',
+	  properties: {
+        config: {
+          type: Object
+        },
+      },
+	  ready: function(){
+        this.$.tokenRequest.generateRequest(); // And then also queries Time Series
+      },
+      handleTokenResponse: function(response) {
+        console.log("Retrieved UAA token");
+        this.token = response.detail.response.token;
+        // Ideally getting timeseries would not be done in the same call, but it needs to wait till the token is back
+        this.queryTimeseriesData();
+      },
+      handleTokenError: function(error) {
+        console.error("Couldn't get UAA token");
+      },
+      queryTimeseriesData: function() {
+        this.queryUrl = 'https://time-series-store-predix.run.aws-usw02-pr.ice.predix.io/v1/datapoints';
+
+        authorization = "bearer " + this.token;
+        this.$.timeseriesRequest.headers = {
+          'Predix-Zone-Id': 'b235b339-25b8-4ca0-93be-67d8f01db98e',
+          'authorization': authorization
+        };
+
+        this.$.timeseriesRequest.method = 'POST';
+        // TODO: Update tag name and time range programatically, switch to get latest datapoints call?
+        light = "Light:EDISON-SETUP";
+        temp = "Temperature:EDISON-SETUP";
+
+        currentTime = Date.now();
+
+        beginTime = currentTime - 1000*60*60*3; // 1 day
+        //beginTime = 0;
+
+        this.$.timeseriesRequest.body = JSON.stringify({
+          "cache_time": 0,
+          "tags": [
+            {
+              "name": light,
+            },
+            {
+              "name": temp,
+            }
+          ],
+          "start": beginTime,
+          "end": currentTime
+        });
+
+        this.$.timeseriesRequest.generateRequest();
+      },
+      handleTimeseriesResponse: function(response) {
+        console.log(response.detail.response);
+		this.energyVals = this.parseTimeSeriesToLineChart(0, response.detail.response);
+      },
+      handleTimeseriesError: function(error) {
+        console.error("Time series query failed: ");
+        console.error(error);
+      },
+	  
+	  parseTimeSeriesToLineChart: function(tagNum, timeseriesData) {
+        requestDatapoints = timeseriesData.tags[tagNum].results[0].values;
+		values = [];
+        for (var i=0; i < requestDatapoints.length; i++) {
+          var datapoint = requestDatapoints[i];
+		  var kw = datapoint[1]/10 * 31.9; //GE Arize uses 31.9 Watts 
+          values.push([i,kw]);
+        }
+		chartDataPoints = {
+			"id": 2,
+			"data": {
+			"name": "Energy Usage",
+			"values": values,
+			"max": 10,
+			"min": 0,
+			"threshold": 5.9
+		}};
+		console.log(values)
+        return chartDataPoints;
+      }
     });
   </script>
 
