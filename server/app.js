@@ -129,16 +129,97 @@ if (uaaIsConfigured) {
   
 }
 
-//get client token from uaa
-app.get('/tstoken', function(req, res) {
-    console.log('Getting client token');
-    const tokenConfig = {};
+function getClientToken(callback) {
+  const tokenConfig = {};
+  var clientAccessToken = "";
     oauth2.client.getToken(tokenConfig, function saveToken(error, result) {
         if (error) { console.log('Access Token Error', error.message); }
         var clienttoken = oauth2.accessToken.create(result);
-        var clientAccessToken = clienttoken.token.access_token;
-        res.send(JSON.stringify({'token':clientAccessToken}));
+        clientAccessToken = clienttoken.token.access_token;
+        console.log("Got token: " + clientAccessToken);
+        callback(clientAccessToken, error);
         });
+}
+
+var predixZoneId = 'b235b339-25b8-4ca0-93be-67d8f01db98e';
+
+//get client token from uaa
+app.get('/tstoken', function(req, res) {
+  console.log('Getting client token');
+  /*
+  const tokenConfig = {};
+  oauth2.client.getToken(tokenConfig, function saveToken(error, result) {
+      if (error) { console.log('Access Token Error', error.message); }
+      var clienttoken = oauth2.accessToken.create(result);
+      clientAccessToken = clienttoken.token.access_token;
+      console.log("Got token: " + clientAccessToken);
+      res.send(JSON.stringify({'token':getClientToken()}));
+      });
+
+  */
+  getClientToken(function(token, error) {
+    if(error) {
+      console.log("Couldn't get token!");
+      console.log(error);
+      return;
+    }
+    res.send(JSON.stringify({'token': token}));
+  });
+});
+
+var http = require('http');
+app.get('/lightHoursPerDay', function(req, res) {
+  console.log('in light hours per day');
+
+  getClientToken(function(token, error) {
+    if(error) {
+      console.log("Couldn't get token!");
+      console.log(error);
+      return;
+    }
+    console.log("Retrieved token successfully: " + token);
+    // An object of options to indicate where to post to
+    var postOptions = {
+        hostname: 'https://time-series-store-predix.run.aws-usw02-pr.ice.predix.io/v1/datapoints',
+        port: '80',
+        method: 'POST',
+        headers: {
+            'Predix-Zone-Id': 'b235b339-25b8-4ca0-93be-67d8f01db98e',
+            'authorization': 'bearer ' + token
+        }
+    };
+    var lightTagName = "Light:EDISON-SETUP";
+    var beginTime = 0;
+    var currentTime = Date.now()
+
+    var postBody = JSON.stringify({
+      "cache_time": 0,
+      "tags": [
+        {
+          "name": lightTagName,
+        }
+      ],
+      "start": beginTime,
+      "end": currentTime
+    });
+
+    var postRequest = http.request(postOptions, function(res, error) {
+      res.setEncoding('utf8');
+      res.on('data', function (chunk) {
+        console.log('Received data!');
+        console.log("chunk: " + chunk);
+      });
+    })
+
+    postRequest.on('error', function(error) {
+      console.log("Problem querying timeseries: ");
+      console.log(error);
+    });
+
+    console.log('Posting data...');
+    postRequest.write(postBody);
+    postRequest.end();
+  })
 });
 
 //logout route
