@@ -12,14 +12,14 @@
   <template>
 
     <px-card header-text="Edison Light Data">
-      <px-vis-timeseries
+      <px-vis-timeseries register-location="top"
         options='{{lightChartArgs}}'
         include-all-series="true">
       </px-vis-timeseries>
     </px-card>
 
     <px-card header-text="Edison Temperature Data">
-      <px-vis-timeseries
+      <px-vis-timeseries register-location="top"
         options='{{tempChartArgs}}'
         include-all-series="true">
       </px-vis-timeseries>
@@ -104,8 +104,23 @@
         lightDatapoints = this.parseTimeSeriesToChart(0, response.detail.response);
         tempDatapoints = this.parseTimeSeriesToChart(1, response.detail.response);
 
-        this.lightChartArgs = {"chartData": lightDatapoints};
-        this.tempChartArgs = {"chartData": tempDatapoints};
+        this.lightChartArgs = {
+          "chartData": lightDatapoints,
+          "seriesConfig" : {
+            "Brightness": {
+              "yMax":12
+            }
+          }
+        };
+        this.tempChartArgs = {
+          "chartData": tempDatapoints,
+          "seriesConfig" : {
+            "Celsius": {
+              "yMin":5,
+              "yMax":20
+            }
+          }
+        };
       },
       handleTimeseriesError: function(error) {
         console.error("Time series query failed: ");
@@ -117,7 +132,20 @@
 
         for (var i=0; i < requestDatapoints.length; i++) {
           var datapoint = requestDatapoints[i];
-          chartDataPoints.push({"x": datapoint[0], "y0": datapoint[1]});
+
+          var optimal;
+          if (tagNum == 0) { // light
+            optimal = 10;
+          } else if (tagNum == 1) { // temperature
+            optimal = 16;
+          }
+
+          chartDataPoints.push(
+            {
+              "x": datapoint[0],
+              "Actual": datapoint[1],
+              "Optimal": optimal
+            });
         }
         return chartDataPoints;
       }
