@@ -37,6 +37,15 @@ if (uaaIsConfigured) {
 	passport = passportConfig.configurePassportStrategy(config);
 }
 
+const oauth2 = require('simple-oauth2')({
+        clientID: config.clientId,
+        clientSecret: "tbd_client_secret",
+        site: config.uaaURL,
+        tokenPath: '/oauth/token',
+        authorizationPath: '/oauth/authorize',
+        useBasicAuthorizationHeader: false
+    });
+
 /**********************************************************************
        SETTING UP EXRESS SERVER
 ***********************************************************************/
@@ -116,6 +125,20 @@ if (uaaIsConfigured) {
     // modify this to send a secure.html file if desired.
   	res.send('<h2>This is a sample secure route.</h2>');
   });
+  
+   //get client token from uaa
+   app.get('/tstoken', function(req, res) {
+		console.log('Getting client token');
+		const tokenConfig = {};
+		oauth2.client.getToken(tokenConfig, function saveToken(error, result) {
+			if (error) { console.log('Access Token Error', error.message); }
+			var clienttoken = oauth2.accessToken.create(result);
+			var clientAccessToken = clienttoken.token.access_token;
+			res.send(clientAccessToken);
+			
+			});
+    });
+  
 }
 
 //logout route
