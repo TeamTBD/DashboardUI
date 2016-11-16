@@ -25,6 +25,13 @@
       </px-vis-timeseries>
     </px-card>
 
+    <px-card header-text="Hours of Sunlight per Day">
+      <px-simple-bar-chart register-location="top"
+        chart-data='{{sunlightHoursChartData}}'
+        width="auto">
+      </px-simple-bar-chart>
+    </px-card>
+
     <iron-ajax
       id="tokenRequest"
       url="/tstoken"
@@ -48,7 +55,7 @@
       properties: {
         config: {
           type: Object
-        },
+        }
       },
       ready: function(){
         this.$.tokenRequest.generateRequest(); // And then also queries Time Series
@@ -56,6 +63,7 @@
       handleTokenResponse: function(response) {
         console.log("Retrieved UAA token");
         this.token = response.detail.response.token;
+        console.log(this.token);
         // Ideally getting timeseries would not be done in the same call, but it needs to wait till the token is back
         this.queryTimeseriesData();
       },
@@ -72,25 +80,17 @@
         };
 
         this.$.timeseriesRequest.method = 'POST';
-        // TODO: Update tag name and time range programatically, switch to get latest datapoints call?
         light = "Light:EDISON-SETUP";
         temp = "Temperature:EDISON-SETUP";
 
         currentTime = Date.now();
-
-        // TODO change this back
-        //beginTime = currentTime - 100000; // 100s
-        beginTime = 0;
+        beginTime = currentTime - 10800 * 1000; // 3 hours
 
         this.$.timeseriesRequest.body = JSON.stringify({
           "cache_time": 0,
           "tags": [
-            {
-              "name": light,
-            },
-            {
-              "name": temp,
-            }
+            {"name": light},
+            {"name": temp}
           ],
           "start": beginTime,
           "end": currentTime
@@ -101,6 +101,7 @@
       handleTimeseriesResponse: function(response) {
         console.log(response.detail.response);
 
+        // Tag[0] is light and Tag[1] is temperature
         lightDatapoints = this.parseTimeSeriesToChart(0, response.detail.response);
         tempDatapoints = this.parseTimeSeriesToChart(1, response.detail.response);
 
@@ -121,6 +122,10 @@
             }
           }
         };
+
+        this.sunlightHoursChartData = [this.parseTStoHoursPerDay(response.detail.response.tags[0])];
+        console.log("This is the data: ");
+        console.log(this.sunlightHoursChartData);
       },
       handleTimeseriesError: function(error) {
         console.error("Time series query failed: ");
@@ -148,6 +153,61 @@
             });
         }
         return chartDataPoints;
+      },
+      // Time for some number crunching
+      parseTStoHoursPerDay: function(lightResponse) {
+        lightDatapoints = lightResponse.results[0].values;
+        lightHoursPerDay = [];
+
+        var millisecondsInHour = 60*60*1000;
+        var millisecondsInDay = millisecondsInHour * 24;
+
+        var currentDatapointIndex = 0; 
+        var currentDayIndex = 0;
+        var currentDatapoint = lightDatapoints[currentDatapointIndex];
+        var currentHourStart = currentDatapoint[0];
+        var nextHourStart = currentHourStart + millisecondsInHour;
+
+        var currentDayStart = currentHourStart;
+        var nextDayStart = currentDayStart + millisecondsInDay;
+
+        var sunlightHoursInDay = 0;
+        while (currentDatapoint != null) {
+          var currentTimestamp = currentDatapoint[0];
+          var currentLightValue = currentDatapoint[1];
+
+          if(currentTimestamp > currentHourStart) {
+            if(currentLightValue >= 5) {
+              sunlightHoursInDay++;
+
+              currentHourStart = nextHourStart;
+              nextHourStart = currentHourStart++;
+            }
+          }
+
+          if(currentTimestamp >= nextDayStart) {
+            lightHoursPerDay.push(sunlightHoursInDay);
+
+            sunlightHoursInDay = 0;
+            currentDayIndex++;
+
+            currentDayStart = nextDayStart;
+            nextDayStart = currentDayStart + millisecondsInDay;
+          }
+
+          currentDatapointIndex++;
+          // If runner reaches end, set runner to null TODO: Better way to terminate while loop...
+          if(currentDatapointIndex >= lightDatapoints.length) {
+            currentDatapoint = null;
+          }
+          else {
+            currentDatapoint = lightDatapoints[currentDatapointIndex];
+            currentDatapointIndex++;
+          }
+        }
+
+        lightHoursPerDay.splice(lightHoursPerDay.length-1, 1); // Some bug where a crazy high value is appended
+        return lightHoursPerDay;
       }
     });
   </script>
