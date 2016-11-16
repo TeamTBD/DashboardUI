@@ -84,7 +84,8 @@
         temp = "Temperature:EDISON-SETUP";
 
         currentTime = Date.now();
-        beginTime = currentTime - 10800 * 1000; // 3 hours
+        beginTime = 0; // start of data collection
+        //beginTime = currentTime - 10800 * 1000; // 3 hours
 
         this.$.timeseriesRequest.body = JSON.stringify({
           "cache_time": 0,
@@ -162,7 +163,7 @@
         var millisecondsInHour = 60*60*1000;
         var millisecondsInDay = millisecondsInHour * 24;
 
-        var currentDatapointIndex = 0; 
+        var currentDatapointIndex = 0;
         var currentDayIndex = 0;
         var currentDatapoint = lightDatapoints[currentDatapointIndex];
         var currentHourStart = currentDatapoint[0];
