@@ -9,6 +9,33 @@
     "uri": "/enterprises/parent-asset",
     "level": "enterprise",
     "isOpenable": true
+  }, {
+    "id": "parent-asset2",
+    "name": "Lettuce Environment",
+    "parent": "/parent-asset",
+    "parentId": "/parent-asset",
+    "description": "Parent Asset Description",
+    "uri": "/enterprises/parent-asset",
+    "level": "enterprise",
+    "isOpenable": false
+  }, {
+    "id": "parent-asset3",
+    "name": "Arugula Environment",
+    "parent": "/parent-asset",
+    "parentId": "/parent-asset",
+    "description": "Parent Asset Description",
+    "uri": "/enterprises/parent-asset",
+    "level": "enterprise",
+    "isOpenable": false
+  }, {
+    "id": "parent-asset4",
+    "name": "Kale Environment",
+    "parent": "/parent-asset",
+    "parentId": "/parent-asset",
+    "description": "Parent Asset Description",
+    "uri": "/enterprises/parent-asset",
+    "level": "enterprise",
+    "isOpenable": false
   }],
   "meta": {
     "parentId": null
