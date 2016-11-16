@@ -25,7 +25,7 @@
     <header role="banner" class="flex flex--middle">
       <div class="viewport flex">
         <h3 class="flex__item">
-          <ge-svg-logo class="u-mr--"></ge-svg-logo> Vertical Farm
+          <ge-svg-logo class="u-mr--"></ge-svg-logo> Digital Farm
         </h3>
         <div class="flex__item">
           <div class="flex" style="text-align:right;">
@@ -63,6 +63,17 @@
           <px-view
             active="[[_dashboardsActive]]"
             element-href="/elements/views/dashboards-view.html">
+          </px-view>
+
+          <app-route
+            route="[[_route]]"
+            pattern="/dash"
+            active="{{_dashActive}}">
+          </app-route>
+
+          <px-view
+            active="[[_dashActive]]"
+            element-href="/elements/views/dash-view.html">
           </px-view>
 
           <!-- /blankpage route and view -->
@@ -115,10 +126,16 @@
               "path": "/intro",
               "icon": "fa-building"
             }, {
+              "label": "Dashboard",
+              "path": "/dash",
+              "icon": "fa-tachometer"
+            },
+              {
               "label": "Agriculture",
               "path": "/dashboards",
-              "icon": "fa-tachometer"
-            }]
+              "icon": "fa-cube"
+            }
+            ]
           }
         },
 
