@@ -1,0 +1,16 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/px-card/px-card.html">
+
+<dom-module id="vf-context-card">
+  <template>
+    <px-card header-text="Why Vertical Farming matters">
+      <content></content>
+    </px-card>
+  </template>
+</dom-module>
+<script>
+  Polymer({
+    is: 'vf-context-card',
+    behaviors: [px.card]
+  });
+</script>
